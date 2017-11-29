@@ -5,7 +5,7 @@ import scala.util.Try
 
 
 object FileReaderService {
-  def readFile(fileName: String): Either[String, Seq[String]] =
+  def readFile(fileName: String): Validation[Seq[String]] =
     Try {
       Source.fromFile(fileName)
     }.map { bufferedSource: BufferedSource =>
