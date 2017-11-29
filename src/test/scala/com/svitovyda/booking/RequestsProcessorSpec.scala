@@ -40,7 +40,7 @@ class RequestsProcessorSpec extends WordSpecLike with MustMatchers {
 
     "correctly parse non-integer duration" in {
       val Right(result) = RequestsProcessor.parseRequest(
-        "2015-08-17 10:17:06 EMP001", s"2015-08-21 09:00 1.5")
+        "2015-08-17 10:17:06 EMP001", "2015-08-21 09:00 1.5")
       result.time.end.format(RequestsProcessor.MeetingFormatter) must be ("2015-08-21 10:30")
     }
 
