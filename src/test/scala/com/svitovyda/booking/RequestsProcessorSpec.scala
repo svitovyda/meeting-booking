@@ -5,6 +5,7 @@ import java.time.LocalTime
 import com.svitovyda.booking.Calendar.{Meeting, Period, TimeRange}
 import org.scalatest.{MustMatchers, WordSpecLike}
 
+
 import scala.util.{Failure, Right, Success}
 
 
@@ -51,7 +52,7 @@ class RequestsProcessorSpec extends WordSpecLike with MustMatchers {
         "2015-08-15 17:29:12 EMP005",
         "2015-08-21 16:00 3"
       ))
-      meetings.length must have size 5
+      meetings must have size 5
     }
 
     "reject invalid lines but return valid" in {
@@ -61,7 +62,7 @@ class RequestsProcessorSpec extends WordSpecLike with MustMatchers {
         "------ 17:29:12 EMP005",
         "2015-08-21 16:00 3"
       ))
-      meetings.length must have size 5
+      meetings must have size 1
     }
 
     "reject non-paired lines" in {
@@ -74,7 +75,7 @@ class RequestsProcessorSpec extends WordSpecLike with MustMatchers {
         "2015-08-15 17:29:12 EMP005",
         "2015-08-21 16:00 3"
       ))
-      meetings.length must have size 1 // TODO: implement smart validation of pairs to not skip valid
+      meetings must have size 1 // TODO: implement smart validation of pairs to not skip valid
     }
 
     "ignore empty lines" in {
@@ -91,7 +92,7 @@ class RequestsProcessorSpec extends WordSpecLike with MustMatchers {
         "2015-08-15 17:29:12 EMP005",
         "2015-08-21 16:00 3"
       ))
-      meetings.length must have size 3
+      meetings must have size 3
     }
   }
 

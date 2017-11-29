@@ -23,7 +23,18 @@ object RequestsProcessor {
   def parseRequest(line1: String, line2: String): Validation[Meeting] =
     Left[Error, Meeting](s"Could not parse meeting request $line1 $line2")
 
-  def parseRequests(lines: Seq[String]): List[Meeting] = List()
+  def parseRequests(lines: Seq[String]): List[Meeting] =
+    lines
+      .filter(_.trim.nonEmpty)
+      .grouped(2)
+      .foldLeft(List[Meeting]()) {
+        case (z, List(l1, l2)) =>
+          parseRequest(l1, l2) match {
+            case Right(m) => m :: z
+            case Left(e) => z
+          }
+        case (z, _) => z
+      }
 
   def createCalendar(header: String, lines: Seq[String]): Validation[Calendar] =
     parseHeader(header).map { timeRange =>
