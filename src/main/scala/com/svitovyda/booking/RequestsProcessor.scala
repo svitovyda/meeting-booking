@@ -3,7 +3,7 @@ package com.svitovyda.booking
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-import com.svitovyda.booking.Calendar.TimeRange
+import com.svitovyda.booking.Calendar.{Meeting, TimeRange}
 
 import scala.util.Try
 
@@ -19,6 +19,11 @@ object RequestsProcessor {
     }
     TimeRange(start, end)
   }
+
+  def parseRequest(line1: String, line2: String): Validation[Meeting] =
+    Left[Error, Meeting](s"Could not parse meeting request $line1 $line2")
+
+  def parseRequests(lines: Seq[String]): List[Meeting] = List()
 
   def createCalendar(header: String, lines: Seq[String]): Validation[Calendar] =
     parseHeader(header).map { timeRange =>
