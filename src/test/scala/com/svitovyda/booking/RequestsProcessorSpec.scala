@@ -1,10 +1,10 @@
 package com.svitovyda.booking
 
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 import com.svitovyda.booking.Calendar.{Meeting, Period, TimeRange}
 import org.scalatest.{MustMatchers, WordSpecLike}
-
 
 import scala.util.{Failure, Right, Success}
 
@@ -29,12 +29,35 @@ class RequestsProcessorSpec extends WordSpecLike with MustMatchers {
 
   "parseRequest()" must {
     "parse valid lines" in {
-      RequestsProcessor.parseRequest(
-        "2015-08-17 10:17:06 EMP001", "2015-08-21 09:00 2") must be (a[Right[Error, Meeting]])
+      val start = "2015-08-21 09:00"
+      val timestamp = "2015-08-17 10:17:06"
+      val Right(result) = RequestsProcessor.parseRequest(s"$timestamp EMP001", s"$start 2")
+      result.time.start.format(RequestsProcessor.MeetingFormatter) must be (start)
+      result.time.end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd 09:mm")) must be (start)
+      result.time.end.getHour must be (11)
+      result.requestDate.format(RequestsProcessor.TimestampFormatter) must be
+    }
+
+    "correctly parse non-integer duration" in {
+      val Right(result) = RequestsProcessor.parseRequest(
+        "2015-08-17 10:17:06 EMP001", s"2015-08-21 09:00 1.5")
+      result.time.end.format(RequestsProcessor.MeetingFormatter) must be ("2015-08-21 10:30")
     }
 
     "reject invalid lines" in {
       RequestsProcessor.parseRequest("", "") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10:17:06 EMP001", "") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10:17:06 EMP001", "2015.08.21 09:00 2") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10:17:06 EMP001", "2015-08-21 09-00 2") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10:17:06 EMP001", "2015-08-21 09:00 .2") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10:17:06 EMP001", "2015-08-21 09:00 123.2") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10:17:06 EMP001", "2015-08-21 09:00 1.234") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10:17:06 EMP001", "2015-08-21 09:00 1.2.3") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("", "2015-08-21 09:00 2") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015:08:21 10:17:06 EMP001", "2015-08-21 09:00 2") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("aaa", "2015-08-21 09:00 2") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10-17-06 EMP001", "2015-08-21 09:00 2") must be (a[Left[Error, Meeting]])
+      RequestsProcessor.parseRequest("2015-08-17 10:17:06 E?M P 0 0 1", "2015-08-21 09:00 2") must be (a[Left[Error, Meeting]])
     }
   }
 
