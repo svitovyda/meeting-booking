@@ -66,18 +66,32 @@ object RequestsProcessor {
       .filter(_.trim.nonEmpty)
       .grouped(2)
       .foldLeft(List[Meeting]()) {
-        case (z, List(l1, l2)) =>
-          parseRequest(l1, l2) match {
-            case Right(m) => m :: z
-            case Left(e) => z
+        case (list, List(line1, line2)) =>
+          parseRequest(line1, line2) match {
+            case Right(meeting) => meeting :: list
+            case Left(_) => list
           }
-        case (z, _) => z
+        case (list, _) => list
       }
 
-  def createCalendar(header: String, lines: Seq[String]): Validation[Calendar] =
+  def createCalendar(header: String, lines: Seq[String]): Try[Calendar] =
     parseHeader(header).map { timeRange =>
-      Right(Calendar(timeRange))
-    }.recover { case e: Exception =>
-      Left(s"Could not create calendar: ${e.getMessage}")
-    }.get
+      parseRequests(lines).foldLeft(Calendar(timeRange)) { (calendar, meeting) =>
+        calendar + meeting
+      }
+    }
+
+  def parseStream(request: Validation[Seq[String]]): Validation[Calendar] = {
+    request match {
+      case Right(header :: lines) if lines.size > 1 =>
+        RequestsProcessor.createCalendar(header, lines)
+          .map { calendar =>
+            Right(calendar)
+          }.recover { case e: Exception =>
+            Left(s"Could not create calendar: ${e.getMessage}")
+          }.get
+      case Left(e) => Left(e)
+      case _ => Left("File doesn't contain enough data")
+    }
+  }
 }

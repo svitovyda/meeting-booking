@@ -3,7 +3,7 @@ package com.svitovyda.booking
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-import com.svitovyda.booking.Calendar.{Meeting, Period, TimeRange}
+import com.svitovyda.booking.Calendar.{Meeting, TimeRange}
 import org.scalatest.{MustMatchers, WordSpecLike}
 
 import scala.util.{Failure, Right, Success}
@@ -121,11 +121,11 @@ class RequestsProcessorSpec extends WordSpecLike with MustMatchers {
 
   "createCalendar()" must {
     "correctly create a calendar" in {
-      RequestsProcessor.createCalendar("0945 1830", List()) must be (Right[Error, Calendar](
-        Calendar(TimeRange(LocalTime.of(9, 45), LocalTime.of(18, 30)))))
+      RequestsProcessor.createCalendar("0945 1830", List()) must be (Success(Calendar(
+        TimeRange(LocalTime.of(9, 45), LocalTime.of(18, 30)))))
 
-      RequestsProcessor.createCalendar(
-        "0945 1830",
+      val Success(calendar) = RequestsProcessor.createCalendar(
+        "0900 1730",
         List(
           "2015-08-17 10:17:06 EMP001",
           "2015-08-21 09:00 2",
@@ -138,7 +138,9 @@ class RequestsProcessorSpec extends WordSpecLike with MustMatchers {
           "2015-08-15 17:29:12 EMP005",
           "2015-08-21 16:00 3"
         )
-      ) must be (a[Right[Error, Calendar]])
+      )
+      calendar.meetings must have size 3
+      calendar.meetings.map(_.employeeId.value) must be (List("EMP002", "EMP003", "EMP004"))
     }
 
     "reject creating calendar" in {

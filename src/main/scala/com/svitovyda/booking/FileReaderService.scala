@@ -9,9 +9,9 @@ object FileReaderService {
     Try {
       Source.fromFile(fileName)
     }.map { bufferedSource: BufferedSource =>
-      val lines = for (line <- bufferedSource.getLines()) yield line
+      val lines = (for (line <- bufferedSource.getLines()) yield line).toList
       bufferedSource.close
-      Right(lines.toSeq)
+      Right(lines)
     }.recover { case e =>
       Left(s"Error reading file $fileName: ${e.getMessage}")
     }.get

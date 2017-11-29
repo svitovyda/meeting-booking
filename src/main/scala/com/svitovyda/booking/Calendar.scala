@@ -4,6 +4,8 @@ import java.time.{LocalDate, LocalDateTime, LocalTime}
 
 import com.svitovyda.booking.Calendar._
 
+import scala.collection.immutable.ListMap
+
 
 case class Calendar(workingHours: TimeRange, meetings: List[Meeting] = List()) { // TODO: use TreeSet instead of List
   def validateMeeting(time: Period): Boolean = {
@@ -15,6 +17,9 @@ case class Calendar(workingHours: TimeRange, meetings: List[Meeting] = List()) {
     if(validateMeeting(meeting.time))
       copy(meetings = (meeting :: meetings).sortBy(_.time.start))
     else this
+
+  def byDay: ListMap[LocalDate, List[Meeting]] = ListMap(
+    meetings.groupBy(_.time.start.toLocalDate).toList:_*)
 }
 
 object Calendar {
@@ -46,6 +51,6 @@ object Calendar {
   }
 
 
-  case class Meeting(time: Period, userId: EmployeeId, requestDate: LocalDateTime)
+  case class Meeting(time: Period, employeeId: EmployeeId, requestDate: LocalDateTime)
 
 }

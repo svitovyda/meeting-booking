@@ -67,6 +67,8 @@ class CalendarSpec extends WordSpecLike with MustMatchers {
       result3.meetings must have size 4
       val result4 = result3 + createMeeting("2015-08-21 17:30 1")
       result4.meetings must have size 5
+      val result5 = result4 + createMeeting("2015-08-22 09:30 6")
+      result5.meetings must have size 6
     }
 
     "reject invalid period" in {
@@ -82,6 +84,34 @@ class CalendarSpec extends WordSpecLike with MustMatchers {
       (calendar + createMeeting("2015-08-21 11:00 1")).meetings must have size 1
       (calendar + createMeeting("2015-08-21 09:30 3")).meetings must have size 1
       (calendar + createMeeting("2015-08-21 10:10 1")).meetings must have size 1
+    }
+
+    "process correctly valid and invalid requests" in {
+      val result = List(
+        "2015-08-21 09:00 2",
+        "2015-08-21 09:00 2",
+        "2015-08-22 14:00 2",
+        "2015-08-22 16:00 1",
+        "2015-08-21 16:00 3"
+      ).foldLeft(Calendar(TimeRange(LocalTime.of(9, 0), LocalTime.of(17, 30)))) { (z, m) =>
+        z + createMeeting(m)
+      }
+
+      result.meetings must have size 3
+    }
+
+    "correctly group by day" in {
+      val calendar = List(
+        "2015-08-21 09:00 2",
+        "2015-08-21 09:00 2",
+        "2015-08-22 14:00 2",
+        "2015-08-22 16:00 1",
+        "2015-08-21 16:00 3"
+      ).foldLeft(Calendar(TimeRange(LocalTime.of(9, 0), LocalTime.of(17, 30)))) { (z, m) =>
+        z + createMeeting(m)
+      }
+
+      calendar.byDay.keys.map(_.getDayOfMonth) must be (Set(21, 22))
     }
   }
 }
