@@ -2,7 +2,7 @@ package com.svitovyda.booking
 
 object AppRunner {
   def main(args: Array[String]): Unit = {
-    if(args.nonEmpty)
+    if(args.nonEmpty) // TODO: add validation of filename
       FileReaderService.readFile(args.head) match {
         case Right(lines) =>
           //val calendar =
