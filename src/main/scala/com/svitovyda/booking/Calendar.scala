@@ -7,7 +7,7 @@ import com.svitovyda.booking.Calendar._
 
 case class Calendar(workingHours: TimeRange, meetings: List[Meeting] = List()) { // TODO: use TreeSet instead of List
   def + (meeting: Meeting): Calendar =
-    copy(meetings = (meeting :: meetings))//.sortBy(_.time.start))
+    copy(meetings = (meeting :: meetings).sortBy(_.time.start))
 }
 
 object Calendar {
@@ -29,6 +29,6 @@ object Calendar {
   }
 
 
-  case class Meeting(time: Period, userId: EmployeeId)
+  case class Meeting(time: Period, userId: EmployeeId, requestDate: LocalDateTime)
 
 }
